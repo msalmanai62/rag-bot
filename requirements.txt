@@ -1,9 +1,14 @@
 fastapi
 uvicorn[standard]
+gunicorn
 python-dotenv
 loguru
 pydantic
+pydantic-settings
+python-multipart
+pydantic[email]
 pyjwt
+loguru
 # The following are optional and reflect the user's current code dependencies
 langchain
 langchain-chat-models

@@ -3,13 +3,13 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 class CreateChatRequest(BaseModel):
-    user_email: EmailStr
+    user_id: str
     name: Optional[str] = None
     default_url: Optional[str] = None
 
 
 class CreateChatResponse(BaseModel):
-    user_email: EmailStr
+    user_id: str
     chat_id: str
 
 
@@ -24,7 +24,7 @@ class ListChatsResponse(BaseModel):
 
 
 class AddDocumentRequest(BaseModel):
-    user_email: EmailStr
+    user_id: str
     chat_id: str
     url: Optional[str]
 
