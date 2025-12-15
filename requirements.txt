@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+loguru
+pydantic
+pyjwt
+# The following are optional and reflect the user's current code dependencies
+langchain
+langchain-chat-models
+langchain-google-genai
+langchain-chroma
+langchain-text-splitters
+langchain-community
+langgraph
