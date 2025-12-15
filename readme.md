@@ -7,3 +7,9 @@ Run locally:
 ```bash
 python -m app.main
 ```
+---
+
+## Simple UI
+
+![RAG Bot UI](./images/ui.png)
+
