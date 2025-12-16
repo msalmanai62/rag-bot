@@ -7,3 +7,4 @@ chroma_langchain_db
 data
 rag_manager.sqlite-shm
 rag_manager.sqlite-wal
+nohup.out

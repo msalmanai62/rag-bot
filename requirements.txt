@@ -17,3 +17,7 @@ langchain-chroma
 langchain-text-splitters
 langchain-community
 langgraph
+
+# Document processing
+pypdf
+python-docx

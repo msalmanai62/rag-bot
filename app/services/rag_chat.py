@@ -18,6 +18,7 @@ from langchain.agents import create_agent
 from langgraph.checkpoint.sqlite import SqliteSaver
 
 from app.utils.logger_setup import log
+from app.utils.file_processor import process_uploaded_file, cleanup_file
 
 
 class RAGService:
@@ -207,6 +208,39 @@ class RAGService:
         key = (user_id, chat_id)
         with self.locks.get(key, threading.Lock()):
             vs.add_documents(chunks)
+
+    def add_documents_from_file(self, user_id: str, chat_id: str, file_path: str, file_name: str):
+        """
+        Add documents from an uploaded file to a chat's vectorstore.
+        
+        Args:
+            user_id: User ID
+            chat_id: Chat ID
+            file_path: Full path to the uploaded file
+            file_name: Original filename with extension
+        """
+        self._assert_chat_owner(user_id, chat_id)
+        
+        try:
+            # Process the file based on its type
+            docs = process_uploaded_file(file_path, file_name)
+            
+            # Split documents into chunks
+            chunks = self.text_splitter.split_documents(docs)
+            
+            # Add chunks to vectorstore
+            vs = self._init_vectorstore_for_chat(user_id, chat_id)
+            key = (user_id, chat_id)
+            with self.locks.get(key, threading.Lock()):
+                vs.add_documents(chunks)
+            
+            log.info(f"Added {len(chunks)} chunks from file {file_name} to chat {chat_id}")
+        except Exception as e:
+            log.error(f"Error adding documents from file: {e}")
+            raise
+        finally:
+            # Clean up the uploaded file
+            cleanup_file(file_path)
 
     def _build_dynamic_prompt_for_chat(self, user_id: str, chat_id: str):
         key = (user_id, chat_id)

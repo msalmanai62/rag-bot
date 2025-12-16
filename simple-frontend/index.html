@@ -555,6 +555,90 @@
             gap: 10px;
         }
 
+        /* Tab buttons */
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab-btn {
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-secondary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        /* Tab content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* File input styling */
+        .file-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .file-input-btn {
+            padding: 10px 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .file-input-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .file-input-btn i {
+            font-size: 1rem;
+        }
+
+        .file-name {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-name.selected {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
         /* Empty state */
         .empty-state {
             display: flex;
@@ -952,9 +1036,31 @@
                     <div class="hint">If not provided, a default name will be generated</div>
                 </div>
                 <div class="form-group">
-                    <label for="newChatUrl">Document URL (Optional)</label>
-                    <input type="text" id="newChatUrl" placeholder="https://example.com/document">
-                    <div class="hint">URL to a document that will be used as context for this chat</div>
+                    <label>Add Context (Optional)</label>
+                    <div class="tab-buttons">
+                        <button type="button" class="tab-btn active" data-tab="url-tab">URL</button>
+                        <button type="button" class="tab-btn" data-tab="file-tab">File</button>
+                    </div>
+                </div>
+                <div id="url-tab" class="tab-content active">
+                    <div class="form-group">
+                        <label for="newChatUrl">Document URL</label>
+                        <input type="text" id="newChatUrl" placeholder="https://example.com/document">
+                        <div class="hint">URL to a document that will be used as context</div>
+                    </div>
+                </div>
+                <div id="file-tab" class="tab-content">
+                    <div class="form-group">
+                        <label for="newChatFile">Upload Document</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="newChatFile" accept=".pdf,.docx,.csv,.txt" style="display: none;">
+                            <button type="button" class="file-input-btn" id="newChatFileBtn">
+                                <i class="fas fa-cloud-upload-alt"></i> Choose File
+                            </button>
+                            <span id="newChatFileName" class="file-name">No file chosen</span>
+                        </div>
+                        <div class="hint">Supported: PDF, DOCX, CSV, TXT (Max 10MB)</div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -983,8 +1089,30 @@
                     <input type="text" id="addDocChatId" placeholder="Enter chat ID">
                 </div>
                 <div class="form-group">
-                    <label for="addDocUrl">Document URL *</label>
-                    <input type="text" id="addDocUrl" placeholder="https://example.com/document">
+                    <label>Document Source</label>
+                    <div class="tab-buttons">
+                        <button type="button" class="tab-btn active" data-tab="url-tab-add">URL</button>
+                        <button type="button" class="tab-btn" data-tab="file-tab-add">File</button>
+                    </div>
+                </div>
+                <div id="url-tab-add" class="tab-content active">
+                    <div class="form-group">
+                        <label for="addDocUrl">Document URL</label>
+                        <input type="text" id="addDocUrl" placeholder="https://example.com/document">
+                    </div>
+                </div>
+                <div id="file-tab-add" class="tab-content">
+                    <div class="form-group">
+                        <label for="addDocFile">Upload Document</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="addDocFile" accept=".pdf,.docx,.csv,.txt" style="display: none;">
+                            <button type="button" class="file-input-btn" id="addDocFileBtn">
+                                <i class="fas fa-cloud-upload-alt"></i> Choose File
+                            </button>
+                            <span id="addDocFileName" class="file-name">No file chosen</span>
+                        </div>
+                        <div class="hint">Supported: PDF, DOCX, CSV, TXT (Max 10MB)</div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1079,6 +1207,26 @@
             cancelNewChatBtn.addEventListener('click', () => hideModal(newChatModal));
             closeAddDocumentModal.addEventListener('click', () => hideModal(addDocumentModal));
             cancelAddDocumentBtn.addEventListener('click', () => hideModal(addDocumentModal));
+            
+            // Tab switching for modals
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', switchTab);
+            });
+            
+            // File input handlers
+            document.getElementById('newChatFileBtn')?.addEventListener('click', () => {
+                document.getElementById('newChatFile').click();
+            });
+            document.getElementById('newChatFile')?.addEventListener('change', (e) => {
+                handleFileSelect(e, 'newChatFileName');
+            });
+            
+            document.getElementById('addDocFileBtn')?.addEventListener('click', () => {
+                document.getElementById('addDocFile').click();
+            });
+            document.getElementById('addDocFile')?.addEventListener('change', (e) => {
+                handleFileSelect(e, 'addDocFileName');
+            });
             
             // Create chat button
             createChatBtn.addEventListener('click', createNewChat);
@@ -1745,6 +1893,8 @@
             const userId = newChatUserId.value.trim();
             const name = newChatName.value.trim();
             const url = newChatUrl.value.trim();
+            const fileInput = document.getElementById('newChatFile');
+            const file = fileInput?.files[0];
             
             if (!userId) {
                 showNotification('Error', 'User ID is required', 'error');
@@ -1772,8 +1922,14 @@
                 }
                 
                 const data = await response.json();
+                const newChatId = data.chat_id;
                 
-                showNotification('Success', `Chat created successfully! Chat ID: ${data.chat_id}`, 'success');
+                showNotification('Success', `Chat created successfully!`, 'success');
+                
+                // If a file was selected, upload it
+                if (file) {
+                    await uploadFileToChat(userId, newChatId, file);
+                }
                 
                 // Update current user ID if it matches
                 if (userIdInput.value === '' || userIdInput.value === userId) {
@@ -1786,6 +1942,9 @@
                 newChatUserId.value = '';
                 newChatName.value = '';
                 newChatUrl.value = '';
+                newChatFile.value = '';
+                document.getElementById('newChatFileName').textContent = 'No file chosen';
+                document.getElementById('newChatFileName').classList.remove('selected');
                 
                 // Reload chats
                 loadChats();
@@ -1801,29 +1960,42 @@
             const userId = addDocUserId.value.trim();
             const chatId = addDocChatId.value.trim();
             const url = addDocUrl.value.trim();
+            const fileInput = document.getElementById('addDocFile');
+            const file = fileInput?.files[0];
             
-            if (!userId || !chatId || !url) {
-                showNotification('Error', 'All fields are required', 'error');
+            if (!userId || !chatId) {
+                showNotification('Error', 'User ID and Chat ID are required', 'error');
+                return;
+            }
+            
+            if (!url && !file) {
+                showNotification('Error', 'Please provide either a URL or upload a file', 'error');
                 return;
             }
             
             try {
-                const payload = {
-                    user_id: userId,
-                    chat_id: chatId,
-                    url: url
-                };
-                
-                const response = await fetch(`${API_BASE_URL}/chats/add_document`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Failed to add document: ${response.status}`);
+                if (file) {
+                    // Upload file
+                    await uploadFileToChat(userId, chatId, file);
+                } else if (url) {
+                    // Add document via URL
+                    const payload = {
+                        user_id: userId,
+                        chat_id: chatId,
+                        url: url
+                    };
+                    
+                    const response = await fetch(`${API_BASE_URL}/chats/add_document`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to add document: ${response.status}`);
+                    }
                 }
                 
                 showNotification('Success', 'Document added successfully!', 'success');
@@ -1843,6 +2015,101 @@
             } catch (error) {
                 console.error('Error adding document:', error);
                 showNotification('Error', `Failed to add document: ${error.message}`, 'error');
+            }
+        }
+
+        // Upload a file to a chat
+        async function uploadFileToChat(userId, chatId, file) {
+            const formData = new FormData();
+            formData.append('user_id', userId);
+            formData.append('chat_id', chatId);
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/chats/add_file`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `Failed to upload file: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                showNotification('Success', `File '${file.name}' uploaded and processed successfully!`, 'success');
+                return true;
+                
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                showNotification('Error', `Failed to upload file: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Handle file selection
+        function handleFileSelect(event, displayElementId) {
+            const file = event.target.files[0];
+            const displayElement = document.getElementById(displayElementId);
+            
+            if (file) {
+                // Validate file size (10MB max)
+                const maxSize = 10 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    showNotification('Error', `File too large. Maximum size: 10MB`, 'error');
+                    event.target.value = '';
+                    displayElement.textContent = 'No file chosen';
+                    displayElement.classList.remove('selected');
+                    return;
+                }
+                
+                // Validate file type
+                const validTypes = ['.pdf', '.docx', '.csv', '.txt'];
+                const fileName = file.name.toLowerCase();
+                const isValid = validTypes.some(ext => fileName.endsWith(ext));
+                
+                if (!isValid) {
+                    showNotification('Error', `Unsupported file type. Supported: PDF, DOCX, CSV, TXT`, 'error');
+                    event.target.value = '';
+                    displayElement.textContent = 'No file chosen';
+                    displayElement.classList.remove('selected');
+                    return;
+                }
+                
+                displayElement.textContent = file.name;
+                displayElement.classList.add('selected');
+            } else {
+                displayElement.textContent = 'No file chosen';
+                displayElement.classList.remove('selected');
+            }
+        }
+
+        // Switch between tabs in modals
+        function switchTab(event) {
+            const btn = event.target.closest('.tab-btn');
+            if (!btn) return;
+            
+            const tabName = btn.dataset.tab;
+            const tabButtonsContainer = btn.parentElement;
+            const modal = tabButtonsContainer.closest('.modal');
+            
+            // Remove active class from all buttons in this group
+            tabButtonsContainer.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            btn.classList.add('active');
+            
+            // Hide all tab contents in this modal
+            modal.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show the selected tab content
+            const tabContent = modal.querySelector(`#${tabName}`);
+            if (tabContent) {
+                tabContent.classList.add('active');
             }
         }
 

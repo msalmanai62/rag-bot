@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = "change-me"
     JWT_ALGORITHM: str = "HS256"
     HOST: str = "0.0.0.0"
-    PORT: int = 8000
+    PORT: int = 8001
 
     class Config:
         env_file = ".env"

@@ -1,0 +1,66 @@
+[Unit]
+Description=RAG Chat FastAPI Application
+Documentation=https://github.com/msalmanai62/rag-chat
+After=network.target
+Requires=network.target
+
+# Ensure socket directory exists before starting service
+After=tmp.mount
+Wants=tmp.mount
+
+[Service]
+# User to run the service
+User=www-data
+Group=www-data
+
+# Working directory
+WorkingDirectory=/home/muhammadsalmanai62/Documents/learning/rag/rag-bot
+
+# Environment variables
+Environment="PATH=/home/muhammadsalmanai62/miniconda3/envs/venv_langchain/bin"
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONDONTWRITEBYTECODE=1"
+
+# Application startup command
+# Simple gunicorn command without external config file
+ExecStartPre=/bin/bash -c 'mkdir -p /run/rag-chat /var/log/rag-chat && chmod 755 /run/rag-chat'
+ExecStart=/home/muhammadsalmanai62/miniconda3/envs/venv_langchain/bin/gunicorn \
+    --workers 5 \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --bind 0.0.0.0:8000 \
+    --timeout 120 \
+    --access-logfile /var/log/rag-chat/access.log \
+    --error-logfile /var/log/rag-chat/error.log \
+    app.main:app
+
+# Restart policy
+Restart=on-failure
+RestartSec=5s
+StartLimitInterval=600s
+StartLimitBurst=3
+
+# Process management
+Type=simple
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=false
+ProtectSystem=false
+ProtectHome=false
+ReadWritePaths=/run/rag-chat /var/log/rag-chat /home/muhammadsalmanai62/Documents/learning/rag/rag-bot/chroma_langchain_db /home/muhammadsalmanai62/Documents/learning/rag/rag-bot/*.sqlite*
+
+# Resource limits
+LimitNOFILE=65535
+LimitNPROC=65535
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rag-chat
+
+# Auto-restart on system reboot
+[Install]
+WantedBy=multi-user.target
